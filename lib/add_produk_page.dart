@@ -1,5 +1,3 @@
-// File: lib/add_product_page.dart
-
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 
@@ -25,7 +23,7 @@ class _AddProductPageState extends State<AddProductPage> {
     String price = _priceController.text;
     String description = _descriptionController.text;
 
-    // Validasi input tidak boleh kosong
+    // Validasi input
     if (name.isEmpty || price.isEmpty || description.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Semua kolom wajib diisi!')),
@@ -34,7 +32,6 @@ class _AddProductPageState extends State<AddProductPage> {
       return;
     }
 
-    // Memanggil fungsi addProduct dari ApiService
     bool isSuccess = await _apiService.addProduct(name, price, description);
 
     setState(() => _isLoading = false);
@@ -43,9 +40,8 @@ class _AddProductPageState extends State<AddProductPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Produk berhasil disimpan ke draft!')),
       );
-      // Kembali ke halaman Katalog Produk sambil mengirim sinyal "true" bahwa ada data baru
       if (context.mounted) {
-        Navigator.pop(context, true);
+        Navigator.pop(context, true); // Kirim sinyal refresh
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -70,7 +66,6 @@ class _AddProductPageState extends State<AddProductPage> {
             const Icon(Icons.add_box, size: 80, color: Colors.blueAccent),
             const SizedBox(height: 20),
             
-            // Input Nama Produk
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(
@@ -80,10 +75,9 @@ class _AddProductPageState extends State<AddProductPage> {
             ),
             const SizedBox(height: 16),
             
-            // Input Harga
             TextField(
               controller: _priceController,
-              keyboardType: TextInputType.number, // Keyboard khusus angka
+              keyboardType: TextInputType.number, // Input angka
               decoration: const InputDecoration(
                 labelText: 'Harga (Rp)',
                 border: OutlineInputBorder(),
@@ -91,10 +85,9 @@ class _AddProductPageState extends State<AddProductPage> {
             ),
             const SizedBox(height: 16),
             
-            // Input Deskripsi
             TextField(
               controller: _descriptionController,
-              maxLines: 3, // Agar kotak teks lebih besar
+              maxLines: 3,
               decoration: const InputDecoration(
                 labelText: 'Deskripsi',
                 border: OutlineInputBorder(),
@@ -102,7 +95,6 @@ class _AddProductPageState extends State<AddProductPage> {
             ),
             const SizedBox(height: 30),
             
-            // Tombol Simpan
             SizedBox(
               width: double.infinity,
               height: 50,

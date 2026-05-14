@@ -1,5 +1,3 @@
-// File: lib/main.dart
-
 import 'package:flutter/material.dart';
 import 'login_page.dart';
 
@@ -17,8 +15,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      debugShowCheckedModeBanner: false, // Menghilangkan pita "DEBUG" di pojok kanan atas
-      home: const LoginPage(), // Menjadikan LoginPage sebagai halaman utama
+      debugShowCheckedModeBanner: false,
+      home: const LoginPage(),
     );
   }
 }

@@ -8,7 +8,7 @@ class ApiService {
   final storage = const FlutterSecureStorage(); // Penyimpanan token
 
   // Login dan simpan token
-  Future<bool> login(String nim) async {
+  Future<bool> login(String username, String password) async {
     final url = Uri.parse('$baseUrl/api/auth/login');
     
     try {
@@ -19,8 +19,8 @@ class ApiService {
           'Accept': 'application/json',
         },
         body: jsonEncode({
-          'username': nim,
-          'password': nim,
+          'username': username,
+          'password': password,
         }),
       );
 
@@ -89,6 +89,26 @@ class ApiService {
       );
 
       return response.statusCode == 201 || response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Hapus produk (soft delete)
+  Future<bool> deleteProduct(int id) async {
+    final token = await getToken();
+    final url = Uri.parse('$baseUrl/api/products/$id');
+    
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      return response.statusCode == 200 || response.statusCode == 204;
     } catch (e) {
       return false;
     }

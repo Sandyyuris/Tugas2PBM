@@ -1,9 +1,8 @@
-// File: lib/produk_page.dart
-
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'produk_model.dart';
 import 'add_produk_page.dart';
+import 'submit_page.dart';
 
 class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
@@ -20,19 +19,60 @@ class _ProductPageState extends State<ProductPage> {
   @override
   void initState() {
     super.initState();
-    _fetchProducts(); // Memanggil data produk saat halaman pertama kali dibuka
+    _fetchProducts();
   }
 
-  // Fungsi untuk mengambil data dari server
   Future<void> _fetchProducts() async {
     setState(() => _isLoading = true);
-    
     List<Product> products = await _apiService.getProducts();
-    
     setState(() {
       _products = products;
       _isLoading = false;
     });
+  }
+
+  // Konfirmasi sebelum hapus (soft delete)
+  void _confirmDelete(BuildContext context, int productId, String productName) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Hapus Produk?'),
+        content: Text('Yakin ingin menghapus "$productName"?\n\nData hanya akan disembunyikan dari layarmu (Soft Delete).'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              
+              setState(() => _isLoading = true);
+              
+              bool isSuccess = await _apiService.deleteProduct(productId);
+              
+              if (isSuccess) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Produk berhasil dihapus!'), backgroundColor: Colors.green),
+                  );
+                }
+                _fetchProducts(); // Refresh data
+              } else {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Gagal menghapus produk!'), backgroundColor: Colors.red),
+                  );
+                  setState(() => _isLoading = false);
+                }
+              }
+            },
+            child: const Text('Hapus', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -46,12 +86,23 @@ class _ProductPageState extends State<ProductPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _fetchProducts, // Tombol untuk refresh data
+            tooltip: 'Refresh Data',
+            onPressed: _fetchProducts,
+          ),
+          IconButton(
+            icon: const Icon(Icons.upload_file),
+            tooltip: 'Kumpulkan Tugas',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SubmitPage()),
+              );
+            },
           ),
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator()) // Tampilan loading
+          ? const Center(child: CircularProgressIndicator())
           : _products.isEmpty
               ? const Center(child: Text('Belum ada produk. Silakan tambah data.'))
               : ListView.builder(
@@ -69,32 +120,42 @@ class _ProductPageState extends State<ProductPage> {
                         ),
                         title: Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                         subtitle: Text(product.description),
-                        trailing: Text(
-                          'Rp ${product.price}',
-                          style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Rp ${product.price}',
+                              style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline, color: Colors.red),
+                              onPressed: () {
+                                if (product.id != null) {
+                                  _confirmDelete(context, product.id!, product.name);
+                                }
+                              },
+                            ),
+                          ],
                         ),
                       ),
                     );
                   },
                 ),
-
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blueAccent,
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
         onPressed: () async {
-          // Menunggu hasil dari halaman AddProductPage
           final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AddProductPage()),
           );
-
-          // Jika ada produk baru yang berhasil ditambah (result == true), refresh daftar produk
           if (result == true) {
             _fetchProducts();
           }
         },
       ),
-    ); // Ini adalah penutup Scaffold yang sudah ada sebelumnya
+    );
   }
 }

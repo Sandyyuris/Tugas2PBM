@@ -1,9 +1,7 @@
-// File: lib/product_model.dart
-
 class Product {
   final int? id;
   final String name;
-  final String price; // Di JSON tadi price bentuknya String "150000.00"
+  final String price;
   final String description;
 
   Product({
@@ -13,7 +11,6 @@ class Product {
     required this.description,
   });
 
-  // Fungsi untuk mengubah JSON dari API (Postman tadi) menjadi Object Flutter
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       id: json['id'],
@@ -23,7 +20,6 @@ class Product {
     );
   }
 
-  // Fungsi untuk mengubah Object Flutter menjadi JSON untuk dikirim ke API
   Map<String, dynamic> toJson() {
     return {
       'name': name,
