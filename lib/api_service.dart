@@ -7,7 +7,6 @@ class ApiService {
   final String baseUrl = 'https://task.itprojects.web.id';
   final storage = const FlutterSecureStorage(); // Penyimpanan token
 
-  // Login dan simpan token
   Future<bool> login(String username, String password) async {
     final url = Uri.parse('$baseUrl/api/auth/login');
     
@@ -37,12 +36,10 @@ class ApiService {
     }
   }
 
-  // Ambil token
   Future<String?> getToken() async {
     return await storage.read(key: 'auth_token');
   }
 
-  // Ambil data produk (butuh token)
   Future<List<Product>> getProducts() async {
     final token = await getToken();
     final url = Uri.parse('$baseUrl/api/products');
@@ -68,7 +65,6 @@ class ApiService {
     }
   }
 
-  // Tambah produk
   Future<bool> addProduct(String name, String price, String description) async {
     final token = await getToken();
     final url = Uri.parse('$baseUrl/api/products');
@@ -88,13 +84,12 @@ class ApiService {
         }),
       );
 
-      return response.statusCode == 201 || response.statusCode == 200;
+      return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
       return false;
     }
   }
 
-  // Hapus produk (soft delete)
   Future<bool> deleteProduct(int id) async {
     final token = await getToken();
     final url = Uri.parse('$baseUrl/api/products/$id');
@@ -114,8 +109,7 @@ class ApiService {
     }
   }
 
-  // Submit tugas akhir
-  Future<bool> submitTugas(String name, String price, String description, String githubUrl) async {
+  Future<bool> submitTugas(String name, String price, String githubUrl) async {
     final token = await getToken();
     final url = Uri.parse('$baseUrl/api/products/submit');
     
@@ -130,13 +124,17 @@ class ApiService {
         body: jsonEncode({
           'name': name,
           'price': price,
-          'description': description,
+          'description': "Dikirim dari aplikasi flutter",
           'github_url': githubUrl,
         }),
       );
 
+      print('Status Code: ${response.statusCode}');
+      print('Balasan Server: ${response.body}');
+
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
+      print('Error network: $e');
       return false;
     }
   }
